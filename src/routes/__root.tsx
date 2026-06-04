@@ -46,8 +46,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "Generate high-converting social posts, ads, SEO blogs, emails and more." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ea8a82e-58e5-4e0d-a654-9154b8583f92/id-preview-1657a371--d048e7b5-0bf3-434a-b077-616ce6fd79db.lovable.app-1780058487633.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ea8a82e-58e5-4e0d-a654-9154b8583f92/id-preview-1657a371--d048e7b5-0bf3-434a-b077-616ce6fd79db.lovable.app-1780058487633.png" },
+      { name: "theme-color", content: "#FF5E1E" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -88,7 +92,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthSync />
       <Outlet />
-      <Toaster theme="dark" position="top-right" richColors />
+      <Toaster theme="light" position="top-right" richColors />
     </QueryClientProvider>
   );
 }
