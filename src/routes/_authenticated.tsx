@@ -1,9 +1,23 @@
-import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Sparkles, LayoutDashboard, Wand2, History, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/_authenticated")({ component: Layout });
+export const Route = createFileRoute("/_authenticated")({
+  beforeLoad: async ({ location }) => {
+    // Client-side guard: redirect before rendering if not authenticated
+    if (typeof window !== "undefined") {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        throw redirect({
+          to: "/login",
+          search: { redirect: location.pathname },
+        });
+      }
+    }
+  },
+  component: Layout,
+});
 
 function Layout() {
   const navigate = useNavigate();
@@ -11,13 +25,16 @@ function Layout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (error || !data.user) navigate({ to: "/login", replace: true });
-      else setReady(true);
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) {
+        navigate({ to: "/login", replace: true, search: { redirect: path } });
+      } else {
+        setReady(true);
+      }
     });
-  }, [navigate]);
+  }, [navigate, path]);
 
-  if (!ready) return <div className="grid min-h-screen place-items-center text-muted-foreground">Loading…</div>;
+  if (!ready) return <div className="grid min-h-screen place-items-center bg-gradient-hero text-muted-foreground"><div className="flex flex-col items-center gap-4"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div><p>Loading your workspace...</p></div></div>;
 
   const nav = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },

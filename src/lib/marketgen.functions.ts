@@ -209,7 +209,26 @@ export const generateContent = createServerFn({ method: "POST" })
 
     let text = "";
 
-    if (groqKey) {
+    if (geminiKey) {
+      // Direct Google Gemini API (free key from Google AI Studio) — works locally
+      const model = "gemini-2.5-flash"; // higher free-tier limits than 2.0-flash
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts: [{ text: user }] }],
+        }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        console.error("Gemini error", res.status, t);
+        throw new Error(`Gemini API error: ${res.status}`);
+      }
+      const payload = await res.json();
+      text = payload.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
+    } else if (groqKey) {
       // Direct Groq API
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -249,25 +268,6 @@ export const generateContent = createServerFn({ method: "POST" })
       }
       const payload = await res.json();
       text = payload.choices?.[0]?.message?.content ?? "";
-    } else if (geminiKey) {
-      // Direct Google Gemini API (free key from Google AI Studio) — works locally
-      const model = "gemini-2.5-flash"; // higher free-tier limits than 2.0-flash
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts: [{ text: user }] }],
-        }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        console.error("Gemini error", res.status, t);
-        throw new Error(`Gemini API error: ${res.status}`);
-      }
-      const payload = await res.json();
-      text = payload.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
     }
 
     const scores = scoreContent(text, data.contentType, data.inputs.keyword);

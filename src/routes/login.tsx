@@ -1,22 +1,40 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
-export const Route = createFileRoute("/login")({ component: Login });
+const loginSearchSchema = z.object({
+  redirect: z.string().optional().catch(""),
+});
+
+export const Route = createFileRoute("/login")({
+  validateSearch: loginSearchSchema,
+  beforeLoad: async ({ search }) => {
+    // Client-side guard: redirect away if already logged in
+    if (typeof window !== "undefined") {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        throw redirect({ to: search.redirect || "/dashboard", replace: true });
+      }
+    }
+  },
+  component: Login,
+});
 
 function Login() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/dashboard", replace: true });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: search.redirect || "/dashboard", replace: true });
     });
-  }, [navigate]);
+  }, [navigate, search.redirect]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,11 +43,12 @@ function Login() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back");
-    navigate({ to: "/dashboard", replace: true });
+    navigate({ to: search.redirect || "/dashboard", replace: true });
   };
 
   const google = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/dashboard" } });
+    const redirectTo = window.location.origin + (search.redirect || "/dashboard");
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
     if (error) toast.error("Google sign-in failed: " + error.message);
   };
 

@@ -1,33 +1,57 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
-export const Route = createFileRoute("/signup")({ component: Signup });
+const signupSearchSchema = z.object({
+  redirect: z.string().optional().catch(""),
+});
+
+export const Route = createFileRoute("/signup")({
+  validateSearch: signupSearchSchema,
+  beforeLoad: async ({ search }) => {
+    if (typeof window !== "undefined") {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        throw redirect({ to: search.redirect || "/dashboard", replace: true });
+      }
+    }
+  },
+  component: Signup,
+});
 
 function Signup() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) navigate({ to: search.redirect || "/dashboard", replace: true });
+    });
+  }, [navigate, search.redirect]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error, data } = await supabase.auth.signUp({
       email, password,
-      options: { data: { display_name: name }, emailRedirectTo: window.location.origin + "/dashboard" },
+      options: { data: { display_name: name }, emailRedirectTo: window.location.origin + (search.redirect || "/dashboard") },
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    if (data.session) { toast.success("Account created"); navigate({ to: "/dashboard", replace: true }); }
+    if (data.session) { toast.success("Account created"); navigate({ to: search.redirect || "/dashboard", replace: true }); }
     else toast.success("Check your email to confirm your account");
   };
 
   const google = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + "/dashboard" } });
+    const redirectTo = window.location.origin + (search.redirect || "/dashboard");
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
     if (error) toast.error("Google sign-in failed: " + error.message);
   };
 
