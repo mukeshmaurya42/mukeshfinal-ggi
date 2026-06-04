@@ -40,13 +40,13 @@ function History() {
       </header>
 
       <div className="mb-6 relative max-w-md">
-        <input placeholder="Search by title or type…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full rounded-xl border border-border bg-surface/50 px-4 py-3 pl-10 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/50" />
+        <input placeholder="Search by title or type…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full rounded-xl border border-border bg-surface px-4 py-3 pl-10 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-sm" />
         <svg className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
       </div>
 
       <div className="space-y-4">
         {items.map((i) => (
-          <div key={i.id} className="overflow-hidden rounded-2xl border border-border bg-surface/50 shadow-sm transition-colors hover:border-border/80 hover:bg-surface/80">
+          <div key={i.id} className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-colors hover:border-primary/50">
             <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <button onClick={() => setOpen(open === i.id ? null : i.id)} className="flex min-w-0 flex-1 items-start gap-4 text-left">
                 <div className="mt-1 hidden h-8 w-8 shrink-0 place-items-center rounded-full bg-surface-2 text-muted-foreground sm:grid">
@@ -67,12 +67,12 @@ function History() {
               <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
                 <div className="mr-2 flex items-center gap-3">
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">SEO</span>
-                    <span className={`text-sm font-bold ${i.seo_score && i.seo_score > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{i.seo_score || '-'}</span>
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">SEO</span>
+                    <span className={`text-sm font-bold ${i.seo_score && i.seo_score > 80 ? 'text-primary' : 'text-foreground'}`}>{i.seo_score || '-'}</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">MKT</span>
-                    <span className={`text-sm font-bold ${i.marketing_score && i.marketing_score > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{i.marketing_score || '-'}</span>
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">MKT</span>
+                    <span className={`text-sm font-bold ${i.marketing_score && i.marketing_score > 80 ? 'text-primary' : 'text-foreground'}`}>{i.marketing_score || '-'}</span>
                   </div>
                 </div>
                 
@@ -85,7 +85,7 @@ function History() {
             </div>
             
             {open === i.id && (
-              <div className="border-t border-border bg-surface-2/30 p-5 sm:p-6">
+              <div className="border-t border-border bg-surface-2 p-5 sm:p-6">
                 <pre className="max-h-[50vh] overflow-auto whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">{i.generated_content}</pre>
               </div>
             )}

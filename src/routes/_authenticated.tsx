@@ -44,57 +44,57 @@ function Layout() {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      {/* Mobile Top Header */}
-      <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur md:hidden">
-        <Link to="/dashboard" className="flex items-center gap-2 font-display text-lg font-bold">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-primary shadow-glow"><Sparkles className="h-3.5 w-3.5 text-primary-foreground" /></span>
-          MarketGen
-        </Link>
-        <button onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/", replace: true }); }} className="rounded-full p-2 text-muted-foreground hover:bg-surface-2 hover:text-foreground">
-          <LogOut className="h-5 w-5" />
-        </button>
-      </header>
-
-      {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-sidebar/95 backdrop-blur md:flex">
-        <div className="flex h-full flex-col p-6">
-          <Link to="/dashboard" className="mb-10 flex items-center gap-2 font-display text-xl font-bold">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-primary shadow-glow"><Sparkles className="h-4 w-4 text-primary-foreground" /></span>
-            MarketGen <span className="text-gradient">AI</span>
+    <div className="flex min-h-screen bg-background">
+      {/* Desktop Sidebar (FlowPilot Style) */}
+      <aside className="hidden w-64 flex-col border-r border-border bg-surface lg:flex">
+        <div className="flex h-16 items-center px-6">
+          <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold tracking-tight text-foreground">
+            <span className="grid h-8 w-8 place-items-center rounded bg-primary"><Sparkles className="h-4 w-4 text-primary-foreground" /></span>
+            MarketGen
           </Link>
-          <nav className="flex flex-1 flex-col gap-2">
-            {nav.map((n) => {
-              const active = path === n.to;
-              return (
-                <Link key={n.to} to={n.to} className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${active ? "bg-gradient-primary text-primary-foreground shadow-glow" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"}`}>
-                  <n.icon className="h-5 w-5" />{n.label}
-                </Link>
-              );
-            })}
+        </div>
+        <div className="flex flex-1 flex-col justify-between p-4">
+          <nav className="space-y-1">
+            <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">General</div>
+            {NAV.map((n) => (
+              <Link key={n.to} to={n.to} className="[&.active]:bg-primary/10 [&.active]:text-primary [&.active]:font-semibold flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground">
+                <n.icon className="h-4 w-4" /> {n.label}
+              </Link>
+            ))}
           </nav>
-          <button onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/", replace: true }); }} className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground transition-all hover:bg-sidebar-accent hover:text-foreground">
-            <LogOut className="h-5 w-5" /> Sign out
+          <button onClick={handleSignOut} disabled={out} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground disabled:opacity-50">
+            <LogOut className="h-4 w-4" /> Sign out
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="md:pl-64 pb-20 md:pb-0">
-        <div className="mx-auto max-w-6xl p-4 md:p-8"><Outlet /></div>
-      </main>
+      <div className="flex flex-1 flex-col">
+        {/* Mobile Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-surface/80 px-4 backdrop-blur-md lg:hidden">
+          <div className="flex items-center gap-2 font-display text-lg font-bold tracking-tight text-foreground">
+            <span className="grid h-7 w-7 place-items-center rounded bg-primary"><Sparkles className="h-3.5 w-3.5 text-primary-foreground" /></span>
+            MarketGen
+          </div>
+          <button onClick={handleSignOut} className="rounded p-2 text-muted-foreground hover:bg-surface-2 hover:text-foreground"><LogOut className="h-5 w-5" /></button>
+        </header>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-center justify-around border-t border-border bg-background/90 px-2 backdrop-blur-md pb-safe md:hidden">
-        {nav.map((n) => {
-          const active = path === n.to;
-          return (
-            <Link key={n.to} to={n.to} className={`flex w-full flex-col items-center justify-center gap-1 py-1 ${active ? "text-primary" : "text-muted-foreground"}`}>
-              <n.icon className={`h-6 w-6 ${active ? "drop-shadow-[0_0_8px_var(--color-primary)]" : ""}`} />
-              <span className="text-[10px] font-medium">{n.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+        <main className="flex-1 p-4 pb-24 sm:p-6 lg:p-8 lg:pb-8">
+          <Outlet />
+        </main>
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/80 px-4 pb-safe backdrop-blur-lg lg:hidden">
+          <div className="flex h-16 items-center justify-around">
+            {NAV.map((n) => (
+              <Link key={n.to} to={n.to} className="[&.active]:text-primary flex flex-col items-center justify-center gap-1.5 px-3 py-2 text-muted-foreground transition-colors hover:text-foreground">
+                <n.icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium">{n.label}</span>
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </div>
     </div>
   );
 }

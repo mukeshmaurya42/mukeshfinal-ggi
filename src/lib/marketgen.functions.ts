@@ -16,8 +16,12 @@ const GenerateSchema = z.object({
   inputs: z.record(z.string(), z.any()),
 });
 
-function buildPrompt(contentType: string, language: string, inputs: Record<string, any>): { system: string; user: string } {
-  const sys = `You are MarketGen AI, an elite digital marketing copywriter. Always respond in ${language}. Write copy that converts: punchy, specific, emotionally resonant. Use proven copywriting frameworks (AIDA, PAS). No fluff, no clichés like "unleash" or "dive into".`;
+function buildPrompt(contentType: string, language: string, inputs: Record<string, unknown>): { system: string; user: string } {
+  const sys = `You are MarketGen AI, a world-class marketing copywriter and conversion strategist. 
+Always respond in ${language}. 
+Before writing, silently analyze the target audience's psychological drivers, the product's unique value proposition, and the platform's best practices. 
+Then, write copy that is punchy, highly specific, and emotionally resonant. Use proven copywriting frameworks like AIDA, PAS, or StoryBrand. 
+CRITICAL: Do NOT use marketing fluff or clichés like "unleash," "dive into," "elevate," or "supercharge." Output ONLY the requested format.`;
 
   switch (contentType) {
     case "social_post":
@@ -224,10 +228,13 @@ export const generateContent = createServerFn({ method: "POST" })
       throw new Error(`Gemini API error: ${res.status}`);
     }
     
-    const payload = await res.json();
-    text = payload.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
+    const payload = await res.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+    
+    if (payload.candidates && payload.candidates[0]?.content?.parts) {
+      text = payload.candidates[0].content.parts.map((p) => p.text || "").join("");
+    }
 
-    const scores = scoreContent(text, data.contentType, data.inputs.keyword);
+    const scores = scoreContent(text, data.contentType, String(data.inputs.keyword || ""));
 
     // Persist to history
     const title = data.inputs.topic || data.inputs.product || data.inputs.name || data.inputs.brand || data.inputs.businessName || data.contentType;

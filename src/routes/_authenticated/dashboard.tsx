@@ -33,21 +33,21 @@ function Dashboard() {
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="group overflow-hidden rounded-2xl border border-border bg-surface/50 p-5 shadow-sm transition-all hover:border-primary/50 hover:bg-surface">
+          <div key={c.label} className="group overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all hover:border-primary/50 hover:shadow-card">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-surface-2 p-2 text-muted-foreground transition-colors group-hover:text-primary">
+              <div className="rounded-lg bg-surface-2 p-2 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
                 <c.icon className="h-5 w-5" />
               </div>
-              <div className="text-xs font-medium text-muted-foreground">{c.label}</div>
+              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{c.label}</div>
             </div>
-            <div className="mt-4 font-display text-3xl font-bold tracking-tight">{c.value}</div>
+            <div className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground">{c.value}</div>
           </div>
         ))}
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-4 font-display text-xl font-semibold tracking-tight">Recent Activity</h2>
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface/30 shadow-sm">
+        <h2 className="mb-4 font-display text-xl font-semibold tracking-tight text-foreground">Recent Activity</h2>
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
           {history.data?.items.slice(0, 6).map((i, idx) => (
             <div key={i.id} className={`flex items-center justify-between p-4 transition-colors hover:bg-surface/50 ${idx !== 0 ? 'border-t border-border' : ''}`}>
               <div className="min-w-0 pr-4">
@@ -61,13 +61,13 @@ function Dashboard() {
               <div className="flex shrink-0 items-center gap-2">
                 <div className="flex flex-col items-end sm:flex-row sm:items-center sm:gap-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">SEO</span>
-                    <span className={`text-xs font-bold ${i.seo_score && i.seo_score > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{i.seo_score || '-'}</span>
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">SEO</span>
+                    <span className={`text-xs font-bold ${i.seo_score && i.seo_score > 80 ? 'text-primary' : 'text-foreground'}`}>{i.seo_score || '-'}</span>
                   </div>
                   <div className="hidden h-3 w-px bg-border sm:block" />
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">MKT</span>
-                    <span className={`text-xs font-bold ${i.marketing_score && i.marketing_score > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{i.marketing_score || '-'}</span>
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">MKT</span>
+                    <span className={`text-xs font-bold ${i.marketing_score && i.marketing_score > 80 ? 'text-primary' : 'text-foreground'}`}>{i.marketing_score || '-'}</span>
                   </div>
                 </div>
               </div>

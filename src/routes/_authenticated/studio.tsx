@@ -81,6 +81,16 @@ function Studio() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const handleGenerate = () => {
+    const fields = FIELDS[type];
+    const missing = fields.filter((f) => !inputs[f.name] || inputs[f.name].trim() === "");
+    if (missing.length > 0) {
+      toast.error(`Please fill out: ${missing.map(f => f.label).join(", ")}`);
+      return;
+    }
+    m.mutate();
+  };
+
   const setT = (t: Type) => { setType(t); setInputs({}); setResult(null); };
 
   return (
@@ -139,7 +149,7 @@ function Studio() {
           ))}
 
           <div className="pt-2">
-            <button onClick={() => m.mutate()} disabled={m.isPending} className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70">
+            <button onClick={handleGenerate} disabled={m.isPending} className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70">
               {m.isPending ? (
                 <>
                   <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
