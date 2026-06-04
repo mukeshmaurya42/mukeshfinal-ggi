@@ -33,5 +33,7 @@ dist-ssr
 
 # Environment & Vercel
 .env
+.env.*
+!.env.example
 .vercel/
 vercel-env.txt
