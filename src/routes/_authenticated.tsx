@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_authenticated")({
 function Layout() {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
+  const [out, setOut] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -34,16 +35,21 @@ function Layout() {
     });
   }, [navigate, path]);
 
-  if (!ready) return <div className="grid min-h-screen place-items-center bg-gradient-hero text-muted-foreground"><div className="flex flex-col items-center gap-4"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div><p>Loading your workspace...</p></div></div>;
+  const handleSignOut = async () => {
+    setOut(true);
+    await supabase.auth.signOut();
+    navigate({ to: "/login", replace: true });
+  };
 
-  const nav = [
+  if (!ready) return <div className="grid min-h-screen place-items-center bg-background text-muted-foreground"><div className="flex flex-col items-center gap-4"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div><p>Loading your workspace...</p></div></div>;
+
+  const NAV = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/studio", icon: Wand2, label: "Generator Studio" },
     { to: "/history", icon: History, label: "History" },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
     <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar (FlowPilot Style) */}
       <aside className="hidden w-64 flex-col border-r border-border bg-surface lg:flex">
