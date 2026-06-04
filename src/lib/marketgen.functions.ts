@@ -196,12 +196,10 @@ export const generateContent = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => GenerateSchema.parse(data))
   .handler(async ({ data, context }) => {
     const geminiKey = process.env.GEMINI_API_KEY;
-    const openaiKey = process.env.OPENAI_API_KEY;
-    const groqKey = process.env.GROQ_API_KEY;
 
-    if (!openaiKey && !geminiKey && !groqKey) {
+    if (!geminiKey) {
       throw new Error(
-        "AI is not configured. Set GROQ_API_KEY, OPENAI_API_KEY, OR GEMINI_API_KEY in your .env file, then restart the dev server."
+        "AI is not configured. Set GEMINI_API_KEY in your .env file, then restart the dev server."
       );
     }
 
@@ -209,66 +207,25 @@ export const generateContent = createServerFn({ method: "POST" })
 
     let text = "";
 
-    if (geminiKey) {
-      // Direct Google Gemini API (free key from Google AI Studio) — works locally
-      const model = "gemini-2.5-flash"; // higher free-tier limits than 2.0-flash
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents: [{ role: "user", parts: [{ text: user }] }],
-        }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        console.error("Gemini error", res.status, t);
-        throw new Error(`Gemini API error: ${res.status}`);
-      }
-      const payload = await res.json();
-      text = payload.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
-    } else if (groqKey) {
-      // Direct Groq API
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "llama3-70b-8192",
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user },
-          ],
-        }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        console.error("Groq error", res.status, t);
-        throw new Error(`Groq API error: ${res.status}`);
-      }
-      const payload = await res.json();
-      text = payload.choices?.[0]?.message?.content ?? "";
-    } else if (openaiKey) {
-      // Direct OpenAI API (ChatGPT)
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user },
-          ],
-        }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        console.error("OpenAI error", res.status, t);
-        throw new Error(`OpenAI API error: ${res.status}`);
-      }
-      const payload = await res.json();
-      text = payload.choices?.[0]?.message?.content ?? "";
+    const model = "gemini-3.1-flash-lite";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [{ role: "user", parts: [{ text: user }] }],
+      }),
+    });
+    
+    if (!res.ok) {
+      const t = await res.text();
+      console.error("Gemini error", res.status, t);
+      throw new Error(`Gemini API error: ${res.status}`);
     }
+    
+    const payload = await res.json();
+    text = payload.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") ?? "";
 
     const scores = scoreContent(text, data.contentType, data.inputs.keyword);
 
