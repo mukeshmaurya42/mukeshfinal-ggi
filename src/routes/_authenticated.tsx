@@ -23,6 +23,7 @@ function Layout() {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [out, setOut] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -30,6 +31,9 @@ function Layout() {
       if (!data.session) {
         navigate({ to: "/login", replace: true, search: { redirect: path } });
       } else {
+        const u = data.session.user;
+        const meta = u.user_metadata as { full_name?: string; name?: string } | undefined;
+        setUser({ name: meta?.full_name || meta?.name || u.email?.split("@")[0] || "User", email: u.email ?? "" });
         setReady(true);
       }
     });
@@ -113,10 +117,12 @@ function Layout() {
             </button>
             <div className="h-8 w-px bg-border" />
             <div className="flex items-center gap-3">
-              <img src="https://api.dicebear.com/7.x/notionists/svg?seed=John" alt="Avatar" className="h-8 w-8 rounded-full border border-border bg-surface-2" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                {(user?.name || "U").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-foreground">John Doe</span>
-                <span className="text-xs text-muted-foreground">Admin</span>
+                <span className="text-sm font-semibold text-foreground">{user?.name || "…"}</span>
+                <span className="text-xs text-muted-foreground">{user?.email}</span>
               </div>
             </div>
           </div>
