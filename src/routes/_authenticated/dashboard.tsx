@@ -20,42 +20,67 @@ function Dashboard() {
   ];
 
   return (
-    <div>
-      <div className="flex items-end justify-between">
+    <div className="mx-auto max-w-5xl">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="font-display text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Your marketing engine at a glance.</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your content generation command center.</p>
         </div>
-        <Link to="/studio" className="inline-flex items-center gap-2 rounded-lg bg-gradient-primary px-4 py-2.5 font-semibold text-primary-foreground shadow-glow"><Wand2 className="h-4 w-4" /> New generation</Link>
+        <Link to="/studio" className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90">
+          <Wand2 className="h-4 w-4" /> New generation
+        </Link>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} className="glass rounded-2xl p-5">
-            <c.icon className="h-5 w-5 text-primary-glow" />
-            <div className="mt-3 font-display text-3xl font-bold">{c.value}</div>
-            <div className="text-sm text-muted-foreground">{c.label}</div>
+          <div key={c.label} className="group overflow-hidden rounded-2xl border border-border bg-surface/50 p-5 shadow-sm transition-all hover:border-primary/50 hover:bg-surface">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-surface-2 p-2 text-muted-foreground transition-colors group-hover:text-primary">
+                <c.icon className="h-5 w-5" />
+              </div>
+              <div className="text-xs font-medium text-muted-foreground">{c.label}</div>
+            </div>
+            <div className="mt-4 font-display text-3xl font-bold tracking-tight">{c.value}</div>
           </div>
         ))}
       </div>
 
       <div className="mt-10">
-        <h2 className="mb-4 font-display text-xl font-semibold">Recent content</h2>
-        <div className="glass rounded-2xl divide-y divide-border">
-          {history.data?.items.slice(0, 6).map((i) => (
-            <div key={i.id} className="flex items-center justify-between p-4">
-              <div className="min-w-0">
-                <div className="truncate font-medium">{i.title || i.content_type}</div>
-                <div className="text-xs text-muted-foreground">{i.content_type} · {i.language} · {new Date(i.created_at).toLocaleString()}</div>
+        <h2 className="mb-4 font-display text-xl font-semibold tracking-tight">Recent Activity</h2>
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface/30 shadow-sm">
+          {history.data?.items.slice(0, 6).map((i, idx) => (
+            <div key={i.id} className={`flex items-center justify-between p-4 transition-colors hover:bg-surface/50 ${idx !== 0 ? 'border-t border-border' : ''}`}>
+              <div className="min-w-0 pr-4">
+                <div className="truncate text-sm font-semibold">{i.title || i.content_type}</div>
+                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="capitalize">{i.content_type.replace('_', ' ')}</span>
+                  <span>•</span>
+                  <span>{new Date(i.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                </div>
               </div>
-              <div className="flex gap-2 text-xs">
-                <span className="rounded-full bg-surface-2 px-2 py-1">SEO {i.seo_score}</span>
-                <span className="rounded-full bg-surface-2 px-2 py-1">MKT {i.marketing_score}</span>
+              <div className="flex shrink-0 items-center gap-2">
+                <div className="flex flex-col items-end sm:flex-row sm:items-center sm:gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">SEO</span>
+                    <span className={`text-xs font-bold ${i.seo_score && i.seo_score > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{i.seo_score || '-'}</span>
+                  </div>
+                  <div className="hidden h-3 w-px bg-border sm:block" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">MKT</span>
+                    <span className={`text-xs font-bold ${i.marketing_score && i.marketing_score > 80 ? 'text-green-500' : 'text-yellow-500'}`}>{i.marketing_score || '-'}</span>
+                  </div>
+                </div>
               </div>
             </div>
           ))}
           {!history.isLoading && (history.data?.items.length ?? 0) === 0 && (
-            <div className="p-8 text-center text-muted-foreground">No content yet. <Link to="/studio" className="text-primary-glow hover:underline">Generate your first piece</Link>.</div>
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="mb-4 rounded-full bg-surface-2 p-4 text-muted-foreground"><FileText className="h-6 w-6" /></div>
+              <p className="text-sm font-medium text-foreground">No activity yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                <Link to="/studio" className="font-medium text-primary hover:underline">Create your first piece of content</Link>
+              </p>
+            </div>
           )}
         </div>
       </div>

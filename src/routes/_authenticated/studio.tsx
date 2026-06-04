@@ -84,62 +84,109 @@ function Studio() {
   const setT = (t: Type) => { setType(t); setInputs({}); setResult(null); };
 
   return (
-    <div>
-      <h1 className="font-display text-3xl font-bold">Generator Studio</h1>
-      <p className="text-muted-foreground">Pick a content type and craft your prompt.</p>
+    <div className="mx-auto max-w-5xl">
+      <header className="mb-8">
+        <h1 className="font-display text-3xl font-bold tracking-tight">Studio</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Select a module and configure your prompt.</p>
+      </header>
 
-      <div className="mt-6 flex flex-wrap gap-2">
-        {TYPES.map((t) => (
-          <button key={t.id} onClick={() => setT(t.id)} className={`rounded-full px-4 py-1.5 text-sm transition ${type === t.id ? "bg-gradient-primary text-primary-foreground shadow-glow" : "glass hover:bg-surface-2"}`}>{t.label}</button>
-        ))}
+      {/* Swipeable Tool Ribbon */}
+      <div className="-mx-4 mb-8 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+        <div className="flex w-max gap-2">
+          {TYPES.map((t) => {
+            const active = type === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setT(t.id)}
+                className={`relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  active 
+                    ? "bg-foreground text-background shadow-md" 
+                    : "bg-surface text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="glass space-y-4 rounded-2xl p-6">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:gap-10">
+        {/* Editor Pane */}
+        <div className="space-y-5 rounded-2xl border border-border bg-surface/50 p-5 shadow-sm sm:p-6">
           <div>
-            <label className="mb-1.5 block text-sm text-muted-foreground">Language</label>
-            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 outline-none focus:border-primary">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Language</label>
+            <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/50">
               {LANGS.map((l) => <option key={l}>{l}</option>)}
             </select>
           </div>
+          
           {FIELDS[type].map((f) => (
             <div key={f.name}>
-              <label className="mb-1.5 block text-sm text-muted-foreground">{f.label}</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{f.label}</label>
               {f.type === "textarea" ? (
-                <textarea rows={3} placeholder={f.placeholder} value={inputs[f.name] || ""} onChange={(e) => setInputs({ ...inputs, [f.name]: e.target.value })} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 outline-none focus:border-primary" />
+                <textarea rows={4} placeholder={f.placeholder} value={inputs[f.name] || ""} onChange={(e) => setInputs({ ...inputs, [f.name]: e.target.value })} className="w-full resize-y rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/50" />
               ) : f.type === "select" ? (
-                <select value={inputs[f.name] || ""} onChange={(e) => setInputs({ ...inputs, [f.name]: e.target.value })} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 outline-none focus:border-primary">
+                <select value={inputs[f.name] || ""} onChange={(e) => setInputs({ ...inputs, [f.name]: e.target.value })} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/50">
                   <option value="">Choose…</option>
                   {f.options!.map((o) => <option key={o}>{o}</option>)}
                 </select>
               ) : (
-                <input placeholder={f.placeholder} value={inputs[f.name] || ""} onChange={(e) => setInputs({ ...inputs, [f.name]: e.target.value })} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 outline-none focus:border-primary" />
+                <input placeholder={f.placeholder} value={inputs[f.name] || ""} onChange={(e) => setInputs({ ...inputs, [f.name]: e.target.value })} className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/50" />
               )}
             </div>
           ))}
-          <button onClick={() => m.mutate()} disabled={m.isPending} className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-primary px-4 py-3 font-semibold text-primary-foreground shadow-glow disabled:opacity-60">
-            {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
-            {m.isPending ? "Generating…" : "Generate"}
-          </button>
+
+          <div className="pt-2">
+            <button onClick={() => m.mutate()} disabled={m.isPending} className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70">
+              {m.isPending ? (
+                <>
+                  <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4 transition-transform group-hover:scale-110" />
+                  Generate Content
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        <div className="glass rounded-2xl p-6">
+        {/* Output Pane */}
+        <div className="flex min-h-[400px] flex-col overflow-hidden rounded-2xl border border-border bg-surface/30 shadow-sm">
           {result ? (
             <>
-              <div className="mb-4 grid grid-cols-3 gap-2">
-                {[{ k: "SEO", v: result.scores.seo }, { k: "Marketing", v: result.scores.marketing }, { k: "Readability", v: result.scores.readability }].map((s) => (
-                  <div key={s.k} className="rounded-xl bg-surface-2 p-3 text-center">
-                    <div className="font-display text-2xl font-bold text-gradient">{s.v}</div>
-                    <div className="text-xs text-muted-foreground">{s.k}</div>
-                  </div>
-                ))}
+              {/* Output Toolbar */}
+              <div className="flex items-center justify-between border-b border-border bg-surface/50 px-4 py-3">
+                <div className="flex gap-4">
+                  {[{ k: "SEO", v: result.scores.seo }, { k: "Marketing", v: result.scores.marketing }].map((s) => (
+                    <div key={s.k} className="flex items-center gap-1.5 text-xs">
+                      <span className="font-medium text-muted-foreground">{s.k}:</span>
+                      <span className={`font-semibold ${s.v > 80 ? 'text-green-500' : s.v > 50 ? 'text-yellow-500' : 'text-red-500'}`}>{s.v}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => { navigator.clipboard.writeText(result.content); toast.success("Copied to clipboard"); }} className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground">
+                  <Copy className="h-3.5 w-3.5" /> Copy
+                </button>
               </div>
-              <button onClick={() => { navigator.clipboard.writeText(result.content); toast.success("Copied"); }} className="mb-3 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-surface-2"><Copy className="h-3.5 w-3.5" /> Copy</button>
-              <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap rounded-lg bg-background/60 p-4 text-sm">{result.content}</pre>
+              
+              {/* Rendered Markdown Area (simulated with white-space pre for now) */}
+              <div className="flex-1 overflow-auto p-5 sm:p-6">
+                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">{result.content}</pre>
+              </div>
             </>
           ) : (
-            <div className="grid h-full min-h-[300px] place-items-center text-center text-muted-foreground">
-              <div><Wand2 className="mx-auto mb-3 h-8 w-8 text-primary-glow" />Your generated content will appear here.</div>
+            <div className="flex h-full flex-col items-center justify-center p-8 text-center text-muted-foreground">
+              <div className="mb-4 rounded-full bg-surface-2 p-4">
+                <Wand2 className="h-6 w-6 text-muted-foreground/50" />
+              </div>
+              <p className="text-sm font-medium">No content generated yet</p>
+              <p className="mt-1 max-w-[250px] text-xs">Configure your prompt on the left and click generate to see results.</p>
             </div>
           )}
         </div>
