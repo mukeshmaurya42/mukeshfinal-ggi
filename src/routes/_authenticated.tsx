@@ -76,7 +76,6 @@ function Layout() {
             MarketGen
           </Link>
         </div>
-        <div className="flex flex-1 flex-col justify-between p-4">
         <div className="flex flex-1 flex-col justify-between overflow-y-auto p-4">
           <nav className="space-y-6">
             {NAV.map((group) => (
